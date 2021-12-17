@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>no cum at <%= path %></title>
+    <link rel="stylesheet" href="/style" media="all">
+<style>
+main {
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+    align-items: center;
+}
+
+#container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: clamp(20vh, 40vh, 40vh)
+}
+
+#uri-path {
+    color: var(--color-secondary);
+    text-transform: none;
+}
+
+#logo {
+    height: auto;
+    width: auto;
+}
+</style>
+</head>
+<body>
+    <main>
+        <div id="container">
+            <h1 class="text-primary">
+                the <b>cannon</b> at <em id="uri-path"><%= path %></em> can't consume cum.
+            </h1>
+            <%- include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/resources/logo.svg")) %>
+        </div>
+    </main>
+</body>
+</html>

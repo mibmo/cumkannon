@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %> — <%= tagline %></title>
+    <link rel="stylesheet" href="/style" media="all">
+<style>
+main {
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+    justify-items: center;
+    align-items: center;
+}
+
+#header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#header > #title {
+	padding: 0;
+	margin: 0;
+	text-shadow: 2pt 2pt 2pt Rgba(0, 0, 0, 0.5);
+}
+</style>
+</head>
+<body>
+    <main>
+		<div id="header">
+			<h1 class="text-primary" id="title">cum kannon</h1>
+			<h2 class="text-secondary"><em><%= tagline %></em></h2>
+		</div>
+		<!--
+		<article style="background-color: red">
+			other stuff here
+		</article>
+		-->
+    </main>
+</body>
+</html>

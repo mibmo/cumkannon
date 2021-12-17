@@ -1,0 +1,47 @@
+<%
+let mut primary_hue = 352;
+if let Color::Hsl(hue, _, _) = palette.primary {
+    primary_hue = hue
+}
+%>
+
+:root {
+    --color-primary: <%= palette.primary %>;
+    --color-secondary: <%= palette.secondary %>;
+    --color-bg: <%= palette.background %>;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    text-transform: lowercase;
+}
+
+main {
+    background-color: var(--color-bg);
+    position: absolute;
+}
+
+::selection {
+    color: black;
+    background-color: var(--color-primary);
+}
+
+.text-primary {
+    color: var(--color-primary);
+}
+
+.text-secondary {
+    color: var(--color-secondary);
+}
+
+#logo {
+    color: Hsl(<%= primary_hue %>, 72%, 52%);
+    text-shadow: 50px 50px black;
+    height: 64px;
+    width: 64px;
+}
+
+em {
+    text-shadow: 2pt 2pt 1pt Rgba(0, 0, 0, 0.5);
+}
