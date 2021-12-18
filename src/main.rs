@@ -68,5 +68,10 @@ async fn main() {
     let routes = warp::get()
         .and(index.or(style).or(static_files))
         .recover(rejection_handler);
-    warp::serve(routes).run(([0, 0, 0, 0], 8000)).await;
+
+    let port = std::env::var("PORT")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(8000);
+    warp::serve(routes).run(([0, 0, 0, 0], port)).await;
 }
