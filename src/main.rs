@@ -3,18 +3,13 @@
 #[macro_use]
 extern crate lazy_static;
 
-#[macro_use]
-extern crate rocket;
-
 mod style;
-mod utils;
+pub(crate) mod utils;
 
-use rocket::http::{ContentType, Status};
-use rocket::{Request, Response};
-use rocket_contrib::serve::StaticFiles;
-use sailfish::{RenderError, TemplateOnce};
-use std::io::Cursor;
-use utils::random_tagline;
+use sailfish::TemplateOnce;
+use style::{ColorPalette, StyleTemplate};
+use utils::{cheap_rng, random_tagline};
+use warp::{http::StatusCode, reply, Filter, Rejection, Reply};
 
 #[derive(TemplateOnce)]
 #[template(path = "index.html.stpl")]
@@ -29,49 +24,51 @@ struct NotFoundTemplate {
     path: String,
 }
 
-#[get("/")]
-fn index<'a>() -> Result<Response<'a>, RenderError> {
+async fn index_route() -> impl Reply {
+    let rng = cheap_rng();
     let ctx = IndexTemplate {
         title: "cum cannon".to_string(),
-        tagline: random_tagline().to_string(),
+        tagline: random_tagline(rng).to_string(),
     };
 
-    let body = ctx.render_once()?;
+    let body = ctx.render_once().unwrap();
 
-    let response = Response::build()
-        .status(Status::Ok)
-        .header(ContentType::HTML)
-        .sized_body(Cursor::new(body))
-        .finalize();
-
-    Ok(response)
+    warp::reply::html(body)
 }
 
-#[catch(404)]
-fn not_found<'a>(req: &Request) -> Result<Response<'a>, RenderError> {
-    let ctx = NotFoundTemplate {
-        path: req.uri().to_string(),
+async fn style_route() -> impl Reply {
+    let rng = cheap_rng();
+    let ctx = StyleTemplate {
+        palette: ColorPalette::random(rng),
     };
 
-    let body = ctx.render_once()?;
+    let body = ctx.render_once().unwrap();
 
-    let response = Response::build()
-        .status(Status::NotFound)
-        .header(ContentType::HTML)
-        .sized_body(Cursor::new(body))
-        .finalize();
-
-    Ok(response)
+    warp::reply::with_header(body, "Content-Type", "text/css")
 }
 
-fn main() {
-    let routes = routes![style::route, index];
-    let catchers = catchers![not_found];
-    let static_files = StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/resources"));
+async fn rejection_handler(reject: Rejection) -> Result<impl Reply, Rejection> {
+    if reject.is_not_found() {
+        Ok(reply::with_status("Page not found", StatusCode::NOT_FOUND))
+    } else {
+        Ok(reply::with_status(
+            "Internal server error",
+            StatusCode::INTERNAL_SERVER_ERROR,
+        ))
+    }
+}
 
-    rocket::ignite()
-        .register(catchers)
-        .mount("/res", static_files)
-        .mount("/", routes)
-        .launch();
+#[tokio::main]
+async fn main() {
+    let index = warp::path::end().then(index_route);
+    let style = warp::path("style").then(style_route);
+    let static_files = warp::path("res").and(warp::fs::dir(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/resources"
+    )));
+
+    let routes = warp::get()
+        .and(index.or(style).or(static_files))
+        .recover(rejection_handler);
+    warp::serve(routes).run(([0, 0, 0, 0], 8000)).await;
 }

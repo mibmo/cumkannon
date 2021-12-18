@@ -4,7 +4,8 @@ use rand::{Rng, SeedableRng};
 use std::time::SystemTime;
 
 lazy_static! {
-    static ref TAGLINES: Vec<&'static str> = include_str!("taglines").lines().collect::<Vec<&str>>();
+    static ref TAGLINES: Vec<&'static str> =
+        include_str!("taglines").lines().collect::<Vec<&str>>();
 }
 
 pub(crate) fn cheap_rng() -> SmallRng {
@@ -14,8 +15,7 @@ pub(crate) fn cheap_rng() -> SmallRng {
     SmallRng::seed_from_u64(time_since_unix_epoch.as_secs())
 }
 
-pub(crate) fn random_tagline() -> &'static str {
-    let mut rng = cheap_rng();
+pub(crate) fn random_tagline<R: Rng>(mut rng: R) -> &'static str {
     let taglines_dist = Slice::new(&TAGLINES).expect("failed to load taglines");
     rng.sample(taglines_dist)
 }
