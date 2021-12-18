@@ -20,7 +20,7 @@ ADD --chown=${PKG_NAME}:${PKG_NAME} Cargo.toml Cargo.lock ./
 RUN CXX=g++ cargo build --release
 
 # build binary
-ADD --chown=${PKG_NAME}:${PKG_NAME} src ./src
+ADD --chown=${PKG_NAME}:${PKG_NAME} . .
 RUN touch src/*.rs # make cargo think files have been modified
 RUN cargo build --release
 
